@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import javax.sound.sampled.*;
+import java.io.File;
+import java.io.IOException;
 
 public class VictimPicker extends JFrame {
     private JPanel participantPanel;
@@ -65,6 +68,84 @@ public class VictimPicker extends JFrame {
         solvedPanel.add(yesCheckBox);
         solvedPanel.add(noCheckBox);
         solvedPanel.add(submitButton);
+        // Timer UI -danny
+        JLabel timerLabel = new JLabel("Timer:");
+        JLabel displayTimerLabel = new JLabel("00:00");
+        JButton startButton = new JButton("Start");
+        JButton stopButton = new JButton("Stop");
+        JButton resetButton = new JButton("Reset");
+
+        solvedPanel.add(timerLabel);
+        solvedPanel.add(displayTimerLabel);
+        solvedPanel.add(startButton);
+        solvedPanel.add(stopButton);
+        solvedPanel.add(resetButton);
+        // Load Sound -danny
+        final Clip[] clip = {null}; // Declare as final array
+        try {
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("src/fart.wav"));
+            clip[0] = AudioSystem.getClip(); // Assign to the array element
+            clip[0].open(audioInputStream); // Use clip[0] to access the Clip object
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException ex) {
+            ex.printStackTrace();
+        }
+        // Timer Functionality -danny
+        final int[] seconds = {0}; // Make seconds effectively final
+        final Timer[] timer = {null}; // Initialize timer
+
+        startButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (clip[0] != null) {
+                    clip[0].stop();
+                    clip[0].setFramePosition(0);
+                    clip[0].start();
+                }
+                if (timer[0] == null) {
+                    timer[0] = new Timer(1000, new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            seconds[0]++;
+                            displayTimerLabel.setText(String.format("%02d:%02d", seconds[0] / 60, seconds[0] % 60));
+                        }
+                    });
+                    timer[0].start();
+                }
+            }
+        });
+
+        stopButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (clip[0] != null) {
+                    clip[0].stop();
+                    clip[0].setFramePosition(0);
+                    clip[0].start();
+                }
+                if (timer[0] != null) {
+                    timer[0].stop();
+                    timer[0] = null;
+                }
+            }
+        });
+
+        resetButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (clip[0] != null) {
+                    clip[0].stop();
+                    clip[0].setFramePosition(0);
+                    clip[0].start();
+                }
+                seconds[0] = 0;
+                displayTimerLabel.setText("00:00");
+                if (timer[0] != null) {
+                    timer[0].stop();
+                    timer[0] = null;
+                }
+            }
+        });
+
 
         // UI
         leaderboardPanel = new JPanel();
